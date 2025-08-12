@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ascending Number Grid Game</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Confetti JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/confetti-js@0.0.18/dist/index.min.js"></script>
+    <!-- Link to your custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans p-4 min-h-screen flex flex-col items-center">
+    <div class="container mx-auto max-w-2xl text-center flex flex-col items-center">
+        <div class="flex items-center justify-between w-full mb-4">
+            <!-- Replace '#' with your actual logo URL -->
+            <img src="#" alt="Marwadi University Logo" class="h-12 w-auto" onerror="this.style.display='none';">
+            <div id="dark-mode-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 cursor-pointer transition-transform hover:scale-110">
+                <svg id="sun-icon" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <svg id="moon-icon" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </div>
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-teal-500 to-blue-600 dark:from-teal-400 dark:to-blue-500">
+            Ascending Number Grid Game
+        </h1>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            Click the numbers in ascending order as fast as you can!
+        </p>
+
+        <!-- Replace '#' with your actual photo URL -->
+        <div class="mb-6 rounded-lg overflow-hidden shadow-xl w-full max-w-sm">
+            <img src="#" alt="Your Photo" class="w-full h-auto object-cover" onerror="this.parentElement.style.display='none';">
+        </div>
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg mb-6 w-full">
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-4">
+                <div class="flex items-center gap-2">
+                    <label for="rows" class="text-gray-600 dark:text-gray-300 text-lg">Rows:</label>
+                    <input type="number" id="rows" value="5" min="2" max="10"
+                           class="w-24 p-3 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-lg">
+                </div>
+                <div class="flex items-center gap-2">
+                    <label for="cols" class="text-gray-600 dark:text-gray-300 text-lg">Columns:</label>
+                    <input type="number" id="cols" value="5" min="2" max="10"
+                           class="w-24 p-3 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-lg">
+                </div>
+                <button id="generate-btn"
+                        class="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold rounded-lg shadow-lg hover:from-blue-600 hover:to-indigo-700 transition transform hover:scale-105">
+                    Generate Grid
+                </button>
+            </div>
+            <div id="game-controls" class="flex justify-center mt-4 hidden">
+                <button id="start-btn" class="px-6 py-3 bg-green-500 text-white font-bold rounded-lg shadow-lg hover:bg-green-600 transition transform hover:scale-105">
+                    Start Game!
+                </button>
+            </div>
+            <div class="flex justify-between items-center h-6 mt-4">
+                <div id="timer-display" class="text-lg font-bold text-gray-800 dark:text-white">Time: 0s</div>
+                <div id="high-score" class="text-lg font-bold text-yellow-500">High Score: N/A</div>
+            </div>
+        </div>
+        <div id="game-grid" class="bg-gray-800 p-2 rounded-xl shadow-inner w-full max-w-[600px] aspect-square">
+            <!-- Grid cells will be generated here -->
+        </div>
+        <div id="message" class="text-lg font-bold mt-4 text-center"></div>
+    </div>
+    <canvas id="confetti-canvas"></canvas>
+    <!-- Link to your custom JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>

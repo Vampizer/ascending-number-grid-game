@@ -1,0 +1,242 @@
+// script.js
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Element Selection ---
+    const rowsInput = document.getElementById('rows');
+    const colsInput = document.getElementById('cols');
+    const generateBtn = document.getElementById('generate-btn');
+    const startBtn = document.getElementById('start-btn');
+    const gameControlsDiv = document.getElementById('game-controls');
+    const gameGrid = document.getElementById('game-grid');
+    const messageDiv = document.getElementById('message');
+    const timerDisplay = document.getElementById('timer-display');
+    const highScoreDiv = document.getElementById('high-score');
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    const sunIcon = document.getElementById('sun-icon');
+    const moonIcon = document.getElementById('moon-icon');
+
+    // --- Game State Variables ---
+    let nextNumber = 1;
+    let totalCells = 0;
+    let isGameActive = false;
+    let confettiInstance = null;
+    let timerId = null;
+    let startTime = 0;
+    let gridNumbers = [];
+    let rows = 5;
+    let cols = 5;
+
+    // --- Utility Functions ---
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function showMessage(text, colorClass = '') {
+        // Clear previous classes and apply new ones
+        messageDiv.className = 'text-lg font-bold mt-4 text-center';
+        if (colorClass) {
+            messageDiv.classList.add(colorClass);
+        }
+        messageDiv.textContent = text;
+    }
+
+    // --- Game Logic Functions ---
+    function handleCellClick(event) {
+        if (!isGameActive) return;
+
+        const clickedCell = event.target;
+        const clickedNumber = parseInt(clickedCell.dataset.number, 10);
+
+        if (clickedNumber === nextNumber) {
+            clickedCell.classList.add('correct');
+            clickedCell.classList.remove('incorrect');
+            clickedCell.style.cursor = 'default';
+            nextNumber++;
+
+            if (nextNumber > totalCells) {
+                finishGame();
+            } else {
+                showMessage(`✅ Good job! Find ${nextNumber}.`, 'text-green-500 dark:text-green-400');
+            }
+        } else {
+            clickedCell.classList.add('incorrect');
+            setTimeout(() => {
+                clickedCell.classList.remove('incorrect');
+            }, 300);
+            showMessage(`❌ Incorrect! Find ${nextNumber}.`, 'text-red-500 dark:text-red-400');
+        }
+    }
+
+    function generateGrid() {
+        const newRows = parseInt(rowsInput.value, 10);
+        const newCols = parseInt(colsInput.value, 10);
+
+        if (isNaN(newRows) || isNaN(newCols) || newRows < 2 || newCols < 2 || newRows > 10 || newCols > 10) {
+            showMessage("Please enter valid rows and columns (2-10).", 'text-red-500 dark:text-red-400');
+            return;
+        }
+
+        // Update state
+        rows = newRows;
+        cols = newCols;
+
+        resetGameState();
+        showMessage(`Click "Start Game" when you're ready.`, 'text-blue-500 dark:text-blue-400');
+
+        // Clear and set up grid container
+        gameGrid.innerHTML = '';
+        gameGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+        // Generate and shuffle numbers
+        totalCells = rows * cols;
+        gridNumbers = Array.from({ length: totalCells }, (_, i) => i + 1);
+        shuffleArray(gridNumbers);
+
+        // Create grid cells
+        gridNumbers.forEach(number => {
+            const cell = document.createElement('div');
+            cell.classList.add('grid-cell');
+            cell.textContent = number;
+            cell.dataset.number = number;
+            // Click handler will be added on Start
+            gameGrid.appendChild(cell);
+        });
+
+        gameControlsDiv.classList.remove('hidden');
+    }
+
+    function startGame() {
+        if (isGameActive) return;
+        isGameActive = true;
+        gameControlsDiv.classList.add('hidden');
+
+        // Add event listeners to cells
+        const cells = gameGrid.querySelectorAll('.grid-cell');
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleCellClick);
+            cell.classList.remove('correct', 'incorrect');
+            cell.style.cursor = 'pointer';
+        });
+
+        nextNumber = 1;
+        startTime = Date.now();
+
+        // Start timer
+        if (timerId) clearInterval(timerId); // Safety check
+        timerId = setInterval(() => {
+            const elapsedTime = (Date.now() - startTime) / 1000;
+            timerDisplay.textContent = `Time: ${elapsedTime.toFixed(2)}s`;
+        }, 10);
+
+        showMessage(`Find ${nextNumber} to start the timer. Go!`, 'text-blue-500 dark:text-blue-400');
+    }
+
+    function finishGame() {
+        isGameActive = false;
+        clearInterval(timerId);
+        const finalTime = (Date.now() - startTime) / 1000;
+        showMessage(`🏆 Congratulations! You finished in ${finalTime.toFixed(2)}s!`, 'text-green-500 dark:text-green-400');
+        updateHighScore(finalTime);
+        startConfetti();
+    }
+
+    function resetGameState() {
+        if (timerId) {
+            clearInterval(timerId);
+            timerId = null;
+        }
+        timerDisplay.textContent = 'Time: 0s';
+        nextNumber = 1;
+        isGameActive = false;
+        if (confettiInstance) {
+            try {
+                confettiInstance.clear();
+            } catch (e) {
+                console.warn("Confetti clear failed:", e);
+            }
+            confettiInstance = null;
+        }
+        gameControlsDiv.classList.add('hidden');
+        // Remove any leftover click handlers from previous games
+        const oldCells = gameGrid.querySelectorAll('.grid-cell');
+        oldCells.forEach(cell => {
+             cell.removeEventListener('click', handleCellClick);
+        });
+    }
+
+    function startConfetti() {
+        // Check if ConfettiGenerator is available
+        if (typeof ConfettiGenerator !== 'function') {
+             console.warn("Confetti library not loaded or failed to initialize.");
+             return;
+        }
+        const confettiSettings = {
+            target: 'confetti-canvas',
+            max: 500,
+            size: 1,
+            respawn: false,
+            props: ['circle', 'square', 'triangle', 'line'],
+            colors: [[165,104,255],[21,123,245],[255,142,201],[231,235,168]],
+            clock: 100
+        };
+        try {
+            confettiInstance = new ConfettiGenerator(confettiSettings);
+            confettiInstance.render();
+        } catch (e) {
+            console.error("Error starting confetti:", e);
+        }
+    }
+
+    function loadHighScore() {
+        const storedScore = localStorage.getItem('highScore');
+        if (storedScore) {
+            highScoreDiv.textContent = `High Score: ${parseFloat(storedScore).toFixed(2)}s`;
+        } else {
+            highScoreDiv.textContent = 'High Score: N/A';
+        }
+    }
+
+    function updateHighScore(newScore) {
+        const storedScore = localStorage.getItem('highScore');
+        if (!storedScore || newScore < parseFloat(storedScore)) {
+            localStorage.setItem('highScore', newScore.toString());
+            loadHighScore(); // Update the display
+        }
+    }
+
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        const isDarkMode = document.body.classList.contains('dark-mode');
+        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        updateDarkModeIcons(isDarkMode);
+    }
+
+    function updateDarkModeIcons(isDarkMode) {
+        if (isDarkMode) {
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+        } else {
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+        }
+    }
+
+    // --- Event Listeners ---
+    generateBtn.addEventListener('click', generateGrid);
+    startBtn.addEventListener('click', startGame);
+    darkModeToggle.addEventListener('click', toggleDarkMode);
+
+    // --- Initial Setup ---
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+    }
+    updateDarkModeIcons(savedTheme === 'dark');
+    loadHighScore();
+    generateGrid(); // Generate initial grid on load
+});

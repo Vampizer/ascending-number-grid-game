@@ -1,0 +1,92 @@
+/* styles.css */
+:root {
+    --bg-color: #f3f4f6; /* light-gray-100 */
+    --text-color: #1f2937; /* gray-800 */
+    --cell-bg-color: #e5e7eb; /* light-gray-200 */
+    --cell-hover-color: #d1d5db; /* light-gray-300 */
+    --grid-bg-color: #ffffff;
+    --header-color: #0d9488; /* teal-600 */
+}
+
+.dark-mode {
+    --bg-color: #111827; /* dark-gray-900 */
+    --text-color: #f3f4f6; /* light-gray-100 */
+    --cell-bg-color: #374151; /* dark-gray-700 */
+    --cell-hover-color: #4b5563; /* dark-gray-600 */
+    --grid-bg-color: #1f2937;
+    --header-color: #2dd4bf; /* teal-400 */
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+#game-grid {
+    display: grid;
+    gap: 4px;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    aspect-ratio: 1 / 1;
+    background-color: var(--grid-bg-color);
+    border-radius: 1rem;
+    padding: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.grid-cell {
+    background-color: var(--cell-bg-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-color);
+    border-radius: 0.5rem;
+    transition: all 0.1s ease-in-out;
+    user-select: none;
+    cursor: pointer;
+}
+
+.grid-cell:hover:not(.correct) {
+    transform: scale(1.05);
+    background-color: var(--cell-hover-color);
+}
+
+.grid-cell.correct {
+    background-color: #10b981; /* green-500 */
+    color: white;
+    cursor: default;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.grid-cell.incorrect {
+    animation: shake 0.3s ease-in-out;
+    background-color: #ef4444; /* red-500 */
+    color: white;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+}
+
+#confetti-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* Ensure Tailwind classes don't override our custom cell styles */
+.grid-cell {
+    /* Force Tailwind's flexbox */
+    @apply flex items-center justify-center;
+}
